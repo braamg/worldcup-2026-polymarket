@@ -1,0 +1,63 @@
+# World Cup 2026 Predictor – global configuration
+# All paths are relative to the project root.
+
+paths:
+  data_raw:       data/raw
+  data_interim:   data/interim
+  data_processed: data/processed
+  notebooks:      notebooks
+
+modeling:
+  era_start:    "1994-01-01"   # matches before this date are used ONLY for Elo burn-in
+  random_seed:  42
+  # Dixon-Coles empirical-Bayes shrinkage (see src/models/dixon_coles.py).
+  # dc_l2_global: weak ridge toward 0 (pins the additive gauge; == old L2_REG).
+  # dc_l2_conf:   shrinks each team toward its CONFEDERATION mean.
+  # A 2026-06-14 sweep showed dc_l2_conf>0 HURTS the dc_xgb_avg ensemble (it makes
+  # DC redundant with XGB). Kept configurable but defaulted OFF — the validated
+  # optimum is dc_l2_global=0.01, dc_l2_conf=0.0. Do not raise without re-sweeping.
+  dc_l2_global: 0.01
+  dc_l2_conf:   0.0
+
+# Elo hyperparameters.
+# These are the FROZEN values chosen by grid search on pre-2010 matches in
+# phase2_build_elo.py (Brier-minimising on the 1994-2009 window) — i.e. exactly the
+# parameters the historical elo_timeseries.parquet was built with. The live
+# in-tournament updater (extend_elo_with_wc_results) reads them here so that confirmed
+# 2026 results are folded into the ratings on the SAME footing as all of history.
+# (Reconciled 2026-06-14: previously 20/100/0.1 here, which did NOT match the build.)
+elo:
+  k_base:          15     # base K-factor
+  home_advantage: 125     # Elo pts added to home team before expected-score calc
+  mov_factor:     0.25    # margin-of-victory log-scaling factor
+
+simulation:
+  n_simulations: 100_000  # Monte Carlo draws per full-tournament run
+  elo_sigma_base:  50.0   # per-sim Elo jitter 1-sigma (points)
+  elo_sigma_cross: 1.3    # multiplier for cross-confederation teams
+
+tournament:
+  # Scale expected goals down for knockout legs (knockout football is lower-scoring)
+  knockout_goal_rate_deflation: 0.85
+  # Host home advantage for USA/Mexico/Canada in their own stadiums.
+  # Set EQUAL to the general home_advantage (125). The phase8 host sanity check (47
+  # historical WC host matches, 1994-2022) computes e_home from the modeling table,
+  # which was BUILT with the 125-pt advantage, and found residual ~0 — i.e. WC hosts
+  # historically performed in line with the FULL 125-pt home advantage. (Reconciled
+  # 2026-06-14: was 100, set under the mistaken belief the build used 100; the
+  # evidence actually supports 125, the same value regular home teams get.)
+  host_home_advantage_elo: 125    # Elo pts; = general home_advantage (validated by phase8)
+  host_home_advantage_dc:  0.23   # log-goal space; = DC fitted home_adv_ ≈ 0.229 (already consistent)
+  # Cross-confederation uncertainty blend toward uniform (1/3,1/3,1/3).
+  # DISABLED (0.0) after the Phase-10 calibration backtest: every blend>0 RAISED
+  # test RPS, and — decisively — it made the CROSS-CONF slice it was meant to help
+  # WORSE (cross RPS 0.17246 → 0.17322 → 0.17425 at blend 0/0.05/0.10). Cross-conf
+  # uncertainty is instead carried by the data-driven per-team Elo jitter (sparse
+  # confederations → fewer matches → wider sigma), which is calibration-neutral.
+  # A per-confederation strength OFFSET remains a future option; the blanket blend
+  # toward uniform is removed. Do not re-enable without re-running phase10.
+  cross_conf_entropy_blend: 0.0
+  hosts:
+    - United States   # canonical name (TEAM_NAME_ALIASES maps "USA" → "United States")
+    - Mexico
+    - Canada

@@ -1,0 +1,29 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data and run outputs (never committed)
+/data/
+/predictor/data/
+/engine/data/
+*.parquet
+*.csv
+*.npz
+*.xlsx
+*.log
+ledger.json
+forecast_log.csv
+sim_probabilities.json
+sim_outcome_matrix_ids.json
+match_probabilities.json
+*.pdf
