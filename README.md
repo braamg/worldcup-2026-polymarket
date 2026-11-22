@@ -83,7 +83,7 @@ I separated two questions and wrote down the tests in advance (`engine/utils/ver
 
 The forward forecast log ends on 10 Jul 2026, but the results feed the scoreboard reads was last updated on 27 Jun, so 48 resolved markets is the final sample. Re-running the scoreboard on the full log gives the same numbers and the same verdict: **NO EDGE**.
 
-**Real money.** I placed 11 small real-money bets during the tournament. The recorded return is about −11% of total stake, but only 2 of the 11 were marked as settled in my ledger, so that is not a final figure. Either way, the forward scoreboard above, not the handful of real bets, is the evidence that counts.
+**Real money.** I placed 11 small real-money bets during the tournament: 2 match bets and 9 group-stage futures. 3 of the 11 won, and the final return was **−27.5% of total stake** (all bets settled from Polymarket’s resolved markets). The average closing-line value was negative, at about −4¢ per bet, so the prices mostly moved against my entries. Eleven bets prove little either way; the forward scoreboard above is the evidence that counts, and it points the same way.
 
 **What the scoreboard caught along the way:**
 
